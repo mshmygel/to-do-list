@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>TODO list</h1>
+
+  <a href="{% url 'to_do_list:task-create' %}" class="btn btn-primary">Add task</a>
+
+  {% for task in tasks %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">
+          {{ task.content }}
+          {% if not task.task_done %}
+            <span class="text-danger">Not done</span>
+          {% else %}
+            <span class="text-success">Done</span>
+          {% endif %}
+        </h5>
+        <p class="card-text">
+          Created: {{ task.created_at|date:"F d, Y, g:i a" }}
+          {% if task.deadline %}
+             | Deadline: {{ task.deadline|date:"F d, Y, g:i a" }}
+          {% endif %}
+        </p>
+        <p class="card-text">
+          Tags:
+          {% for tag in task.tags.all %}
+            {{ tag.name }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+        </p>
+      
+        <a href="{% url 'to_do_list:task-update' task.pk %}">Update</a>
+        <a href="{% url 'to_do_list:task-delete' task.pk %}">Delete</a>
+      
+        <form action="{% url 'to_do_list:task-status' task.pk %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          {% if not task.task_done %}
+            <button type="submit" class="btn btn-success">Complete</button>
+          {% else %}
+            <button type="submit" class="btn btn-secondary">Undo</button>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  {% empty %}
+    <p>No tasks available.</p>
+  {% endfor %}
+{% endblock %}
